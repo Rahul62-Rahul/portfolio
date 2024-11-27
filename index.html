@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Portfolio Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Stock Portfolio Tracker</h1>
+    </header>
+
+    <section>
+        <h2>Track Your Stock Portfolio</h2>
+        <form method="POST" action="/add">
+            <input type="text" name="symbol" id="symbol" placeholder="Enter Stock Symbol" required>
+            <input type="number" name="shares" id="shares" placeholder="Shares" required>
+            <button type="submit">Add Stock</button>
+        </form>
+
+        <h2>Your Portfolio</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Shares</th>
+                    <th>Current Price</th>
+                    <th>Total Value</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in portfolio %}
+                <tr>
+                    <td>{{ stock.symbol }}</td>
+                    <td>{{ stock.shares }}</td>
+                    <td>${{ stock.latest_price }}</td>
+                    <td>${{ stock.shares * stock.latest_price }}</td>
+                    <td>
+                        <form method="POST" action="/remove">
+                            <input type="hidden" name="symbol" value="{{ stock.symbol }}">
+                            <button type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Total Portfolio Value: $<span id="totalValue">0</span></h3>
+        <button onclick="getPortfolioValue()">Track Performance</button>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Stock Portfolio Tracker</p>
+    </footer>
+
+    <script>
+        function getPortfolioValue() {
+            fetch('/track_performance')
+                .then(response => response.json())
+                .then(data => {
+                    let totalValue = data.total_value;
+                    document.getElementById('totalValue').innerText = totalValue.toFixed(2);
+                })
+                .catch(err => console.error('Error:', err));
+        }
+    </script>
+</body>
+</html>
